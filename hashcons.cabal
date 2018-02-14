@@ -1,0 +1,23 @@
+name: hashcons
+version: 0.1.0
+category: Caching
+synopsis: Hash-consing and memoisation
+description:
+  Hash-consing (a.k.a. interning) and memoisation, with a mostly-clean
+  interface. This library does all the dirty tricks so you don't have to.
+license: LGPL-3
+license-file: LICENCE.txt
+
+author: Andy Morris <hello@andy-morris.xyz>
+maintainer: Andy Morris <hello@andy-morris.xyz>
+
+cabal-version: >= 2.0
+build-type: Simple
+
+library
+  default-language: Haskell2010
+  ghc-options: -Wall
+  exposed-modules:
+    Data.HashCons.SeqSubterms
+  build-depends:
+    base ^>= 4.10.1.0
