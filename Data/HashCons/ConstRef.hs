@@ -9,20 +9,12 @@
 --
 -- Read-only references with pointer equality.
 
-{-# LANGUAGE MagicHash, UnboxedTuples #-}
+module Data.HashCons.ConstRef (ConstRef, newConstRef, readConstRef) where
 
-module Data.HashCons.ConstRef
-  (-- ** Basic API
-   ConstRef, newConstRef, readConstRef,
-   -- ** Weak pointers and finalization
-   mkWeakConstRef, addConstRefFinalizer)
-where
+import Data.HashCons.MkWeak
 
-import GHC.Base  (mkWeak#, mkWeakNoFinalizer#)
-import GHC.IO    (IO (..), unsafeDupablePerformIO)
-import GHC.IORef (IORef (..), newIORef, readIORef)
-import GHC.STRef (STRef (..))
-import GHC.Weak  (Weak (..))
+import Data.IORef       (IORef, newIORef, readIORef)
+import System.IO.Unsafe (unsafeDupablePerformIO)
 
 
 -- | A read-only reference.
@@ -42,28 +34,12 @@ import GHC.Weak  (Weak (..))
 newtype ConstRef a = CR (IORef a)
   deriving Eq -- ^ Pointer equality
 
-
 -- | Make a new 'ConstRef'.
 newConstRef :: a -> IO (ConstRef a)
-newConstRef x =
-  CR <$> newIORef x
+newConstRef x = CR <$> newIORef x
 
 -- | Read the value of a 'ConstRef'.
 readConstRef :: ConstRef a -> a
-readConstRef (CR r) =
-  unsafeDupablePerformIO $ readIORef r
+readConstRef (CR r) = unsafeDupablePerformIO $ readIORef r
 
-
--- | Make a weak pointer with a 'ConstRef' as the key.
-mkWeakConstRef :: ConstRef a -> b -> Maybe (IO ()) -> IO (Weak b)
-mkWeakConstRef (CR (IORef (STRef r#))) v fin =
-    IO $ \s1 -> case res s1 of (# s2, w #) -> (# s2, Weak w #)
-  where
-    res s = case fin of
-      Just (IO fin#) -> mkWeak#            r# v fin# s
-      Nothing        -> mkWeakNoFinalizer# r# v      s
-
--- | Add a finalizer to a 'ConstRef'.
-addConstRefFinalizer :: ConstRef a -> IO () -> IO ()
-addConstRefFinalizer r fin =
-  () <$ mkWeakConstRef r () (Just fin)
+instance MkWeak (ConstRef a) where mkWeak (CR r) = mkWeak r

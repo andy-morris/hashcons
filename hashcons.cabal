@@ -19,6 +19,7 @@ library
   ghc-options: -Wall
   exposed-modules:
     Data.HashCons.SeqSubterms,
+    Data.HashCons.MkWeak,
     Data.HashCons.ConstRef
   build-depends:
     base ^>= 4.10.1.0
