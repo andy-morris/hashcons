@@ -1,0 +1,3 @@
+[submodule "hashtables"]
+	path = hashtables
+	url = git@github.com:andy-morris/hashtables.git
