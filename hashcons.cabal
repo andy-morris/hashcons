@@ -18,8 +18,14 @@ library
   default-language: Haskell2010
   ghc-options: -Wall
   exposed-modules:
-    Data.HashCons.SeqSubterms,
+    Data.HashCons
+  other-modules:
+    Data.HashCons.Cache,
+    Data.HashCons.ConstRef,
+    Data.HashCons.HC,
     Data.HashCons.MkWeak,
-    Data.HashCons.ConstRef
+    Data.HashCons.SeqSubterms
   build-depends:
-    base ^>= 4.10.1.0
+    base       ^>= 4.10.1.0,
+    hashable   ^>= 1.2.6.1,
+    hashtables ^>= 1.2.3
