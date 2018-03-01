@@ -29,3 +29,19 @@ library
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
     hashtables ^>= 1.2.3
+
+flag build-examples
+  description: Whether to build the example programs
+  default: False
+  manual: True
+
+executable hashcons-example-expr
+  main-is: expr.hs
+  hs-source-dirs: examples
+  default-language: Haskell2010
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+    base ^>= 4.10.1.0,
+    hashcons
+  if !flag(build-examples)
+    buildable: False
