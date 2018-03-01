@@ -28,7 +28,7 @@ library
   build-depends:
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
-    hashtables ^>= 1.2.3
+    hashtables ^>= 1.2.2.1
 
 flag build-examples
   description: Whether to build the example programs

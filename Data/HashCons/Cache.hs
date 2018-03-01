@@ -11,6 +11,8 @@
 
 module Data.HashCons.Cache (Cache, newCache, lookupOrAdd) where
 
+import Prelude hiding (lookup)
+
 import Data.HashCons.HC
 import Data.HashCons.MkWeak
 
@@ -38,18 +40,35 @@ remove x (C var) =
   withMVar var $ \cache ->
     delete cache hx
 
-newHC :: (Eq a, Hashable a) => a -> Cache a -> IO (Maybe (CacheEntry a), HC a)
-newHC x c = do
-  y   <- makeHC x
-  ptr <- mkWeakPtr y (Just $ remove x c)
-  pure (Just ptr, y)
+-- TODO: switch to this when/if mutateIO is added to hashtables
+-- newHC :: (Eq a, Hashable a) => a -> Cache a -> IO (Maybe (CacheEntry a), HC a)
+-- newHC x c = do
+--   y   <- makeHC x
+--   ptr <- mkWeakPtr y (Just $ remove x c)
+--   pure (Just ptr, y)
+--
+-- lookupOrAdd :: (Eq a, Hashable a) => a -> Cache a -> IO (HC a)
+-- lookupOrAdd x c@(C var) =
+--   let !hx = hashed x in
+--   withMVar var $ \cache ->
+--     mutateIO cache hx $ \ent -> case ent of
+--       Nothing  -> newHC x c
+--       Just ptr -> deRefWeak ptr >>= \y' -> case y' of
+--         Nothing -> newHC x c
+--         Just y  -> pure (Just ptr, y)
+
 
 lookupOrAdd :: (Eq a, Hashable a) => a -> Cache a -> IO (HC a)
 lookupOrAdd x c@(C var) =
-  let !hx = hashed x in
-  withMVar var $ \cache ->
-    mutateIO cache hx $ \ent -> case ent of
-      Nothing  -> newHC x c
-      Just ptr -> deRefWeak ptr >>= \y' -> case y' of
-        Nothing -> newHC x c
-        Just y  -> pure (Just ptr, y)
+    withMVar var $ \cache ->
+      lookup cache hx >>= \ent -> case ent of
+        Nothing  -> newHC cache
+        Just ptr -> deRefWeak ptr >>= \y' -> case y' of
+          Nothing -> newHC cache
+          Just y  -> pure y
+  where
+    !hx = hashed x
+    newHC cache = do
+      y   <- makeHC x
+      ptr <- mkWeakPtr y (Just $ remove x c)
+      y <$ insert cache hx ptr
