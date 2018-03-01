@@ -21,8 +21,7 @@ library
     Data.HashCons,
     Data.HashCons.ConstRef,
     Data.HashCons.HC,
-    Data.HashCons.MkWeak,
-    Data.HashCons.SeqSubterms
+    Data.HashCons.MkWeak
   other-modules:
     Data.HashCons.Cache,
     Data.HashCons.HC.Internal

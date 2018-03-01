@@ -13,7 +13,6 @@ module Data.HashCons.Cache (Cache, newCache, lookupOrAdd) where
 
 import Data.HashCons.HC
 import Data.HashCons.MkWeak
-import Data.HashCons.SeqSubterms
 
 import Data.Hashable
 import Data.HashTable.IO
@@ -45,10 +44,10 @@ newHC x c = do
   ptr <- mkWeakPtr y (Just $ remove x c)
   pure (Just ptr, y)
 
-lookupOrAdd :: (Eq a, Hashable a, SeqSubterms a) => a -> Cache a -> IO (HC a)
+lookupOrAdd :: (Eq a, Hashable a) => a -> Cache a -> IO (HC a)
 lookupOrAdd x c@(C var) =
   let !hx = hashed x in
-  withMVar (seqSubterms x var) $ \cache ->
+  withMVar var $ \cache ->
     mutateIO cache hx $ \ent -> case ent of
       Nothing  -> newHC x c
       Just ptr -> deRefWeak ptr >>= \y' -> case y' of

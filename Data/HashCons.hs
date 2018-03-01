@@ -20,13 +20,11 @@
 module Data.HashCons
   (HashCons, hc,
    HC, getVal,
-   SeqSubterms (..),
    Hashable (..))
 where
 
 import Data.HashCons.HC
 import Data.HashCons.Cache
-import Data.HashCons.SeqSubterms
 
 import Data.Hashable
 
@@ -34,7 +32,17 @@ import System.IO.Unsafe
 
 
 -- | Types which support hash-consing.
-class (Eq a, Hashable a, SeqSubterms a) => HashCons a where
+--
+-- There are some restrictions on types for which this class makes sense:
+--
+-- 1. The type must have no type variables: an instance for @T Int@ would be
+--    fine, but not for @T a@. (There must also be no constraints, but that is
+--    unlikely to be a problem if all instances are ground.)
+-- 2. Equality and hashing must consider all data in a value. It need not
+--    necessarily be structural equality, but a subterm should not simply be
+--    ignored. (An example of why someone might want to do this is annotations
+--    in an abstract syntax tree.)
+class (Eq a, Hashable a) => HashCons a where
   hcCache :: Cache a
   hcCache = unsafePerformIO newCache
   {-# NOINLINE hcCache #-}
