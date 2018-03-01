@@ -7,6 +7,8 @@
 -- Stability:   experimental
 -- Portability: weak pointers & finalizers
 
+{-# LANGUAGE BangPatterns #-}
+
 module Data.HashCons.Cache (Cache, newCache, lookupOrAdd) where
 
 import Data.HashCons.HC
@@ -22,7 +24,7 @@ import Control.Concurrent.MVar
 type HashTable k v = BasicHashTable k v
 
 
-newtype Cache a = C (MVar (HashTable a (CacheEntry a)))
+newtype Cache a = C (MVar (HashTable (Hashed a) (CacheEntry a)))
 
 type CacheEntry a = Weak (HC a)
 
@@ -33,8 +35,9 @@ newCache =
 
 remove :: (Eq a, Hashable a) => a -> Cache a -> IO ()
 remove x (C var) =
+  let !hx = hashed x in
   withMVar var $ \cache ->
-    delete cache x
+    delete cache hx
 
 newHC :: (Eq a, Hashable a) => a -> Cache a -> IO (Maybe (CacheEntry a), HC a)
 newHC x c = do
@@ -44,8 +47,9 @@ newHC x c = do
 
 lookupOrAdd :: (Eq a, Hashable a, SeqSubterms a) => a -> Cache a -> IO (HC a)
 lookupOrAdd x c@(C var) =
+  let !hx = hashed x in
   withMVar (seqSubterms x var) $ \cache ->
-    mutateIO cache x $ \ent -> case ent of
+    mutateIO cache hx $ \ent -> case ent of
       Nothing  -> newHC x c
       Just ptr -> deRefWeak ptr >>= \y' -> case y' of
         Nothing -> newHC x c
