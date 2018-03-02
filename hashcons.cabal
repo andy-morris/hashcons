@@ -17,6 +17,7 @@ build-type: Simple
 library
   default-language: Haskell2010
   ghc-options: -Wall
+  hs-source-dirs: src
   exposed-modules:
     Data.HashCons,
     Data.HashCons.ConstRef,
