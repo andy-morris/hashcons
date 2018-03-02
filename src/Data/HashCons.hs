@@ -58,9 +58,11 @@ data HC a = HC {-# UNPACK #-} !(Tag a) !(ConstRef a)
 makeHC :: a -> IO (HC a)
 makeHC x = HC <$> makeTag x <*> newConstRef x
 
+-- | Retrieves the unique tag for the value.
 getTag :: HC a -> Tag a
 getTag (HC t _) = t
 
+-- | Retrieves the underlying value.
 getVal :: HC a -> a
 getVal (HC _ x) = readConstRef x
 
