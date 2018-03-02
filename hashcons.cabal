@@ -28,7 +28,8 @@ library
   build-depends:
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
-    hashtables ^>= 1.2.2.1
+    hashtables ^>= 1.2.2.1,
+    deepseq    ^>= 1.4.3.0
 
 flag build-examples
   description: Whether to build the example programs

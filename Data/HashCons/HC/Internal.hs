@@ -16,6 +16,8 @@ import Data.HashCons.MkWeak
 
 import Data.Hashable
 
+import Control.DeepSeq
+
 import System.Mem.StableName
 
 
@@ -31,8 +33,7 @@ makeTag :: a -> IO (Tag a)
 makeTag x = fmap Tag . makeStableName $! x
 
 
--- | A value which has been hash-consed. Equality testing and hashing are
--- constant.
+-- | A value which has been given a unique tag.
 data HC a = HC {-# UNPACK #-} !(Tag a) !(ConstRef a)
 
 -- | Make an @HC@ value.
@@ -46,12 +47,27 @@ getVal :: HC a -> a
 getVal (HC _ x) = readConstRef x
 
 
+-- | \(\mathcal{O}(1)\) using the tag
 instance Eq (HC a) where
   x == y = getTag x == getTag y
 
+-- | Checks the tag for equality first, and otherwise falls back to the
+-- underlying type's ordering
+instance Ord a => Ord (HC a) where
+  compare x y = if x == y then EQ else compare (getVal x) (getVal y)
+
+-- | Shows the underlying value
+instance Show a => Show (HC a) where
+  showsPrec d = showsPrec d . getVal
+
+-- | \(\mathcal{O}(1)\) using the tag
 instance Hashable (HC a) where
   hash         = hash . getTag
   hashWithSalt = hashUsing getTag
+
+-- | Also evaluates the underlying value
+instance NFData a => NFData (HC a) where
+  rnf = rnf . getVal
 
 instance MkWeak (HC a) where
   mkWeak (HC _ x) = mkWeak x

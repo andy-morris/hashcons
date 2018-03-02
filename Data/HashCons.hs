@@ -17,18 +17,19 @@
 --
 -- This library should be thread- and exception-safe.
 
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module Data.HashCons
-  (HashCons, hc,
-   HC, getVal,
-   Hashable (..))
+  (HashCons, hc, HC, getVal)
 where
 
 import Data.HashCons.HC
 import Data.HashCons.Cache
-
 import Data.Hashable
 
 import System.IO.Unsafe
+
+import Foreign
 
 
 -- | Types which support hash-consing.
@@ -50,3 +51,15 @@ class (Eq a, Hashable a) => HashCons a where
 -- | Make a hash-consed value.
 hc :: HashCons a => a -> HC a
 hc x = unsafePerformIO $ lookupOrAdd x hcCache
+
+
+-- | Reads an underlying value and caches it
+instance (Read a, HashCons a) => Read (HC a) where
+  readsPrec d = map (\(x, s) -> (hc x, s)) . readsPrec d
+
+-- | Stores the underlying value, and re-caches it on retrieval
+instance (Storable a, HashCons a) => Storable (HC a) where
+  sizeOf    = sizeOf . getVal
+  alignment = alignment . getVal
+  peek      = fmap hc . peek . castPtr
+  poke p    = poke (castPtr p) . getVal
