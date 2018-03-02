@@ -32,6 +32,19 @@ library
     hashtables ^>= 1.2.2.1,
     deepseq    ^>= 1.4.3.0
 
+test-suite test-hashcons
+  type: exitcode-stdio-1.0
+  main-is: tests.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+    hashcons,
+    base     ^>= 4.10.1.0,
+    hedgehog ^>= 0.5.2,
+    deepseq  ^>= 1.4.3.0,
+    async    ^>= 2.1.1.1
+
 flag build-examples
   description: Whether to build the example programs
   default: False
