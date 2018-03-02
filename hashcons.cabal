@@ -21,11 +21,7 @@ library
   exposed-modules:
     Data.HashCons,
     Data.HashCons.ConstRef,
-    Data.HashCons.HC,
     Data.HashCons.MkWeak
-  other-modules:
-    Data.HashCons.Cache,
-    Data.HashCons.HC.Internal
   build-depends:
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
