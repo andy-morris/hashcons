@@ -15,7 +15,7 @@
     ScopedTypeVariables
   #-}
 
-module Data.HashCons.MkWeak (Weak, Finalizer, MkWeak (..), deRefWeak) where
+module Data.HashCons.MkWeak (MkWeak (..), Weak, Finalizer, deRefWeak) where
 
 import GHC.Base  (IO (..), mkWeak#, mkWeakNoFinalizer#)
 import GHC.MVar  (MVar (..))
