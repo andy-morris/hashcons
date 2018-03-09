@@ -17,6 +17,8 @@
 --
 -- This library should be thread- and exception-safe.
 
+{-# LANGUAGE FlexibleInstances #-}
+
 module Data.HashCons
   (HashCons, hc,
    HC, getVal, getTag, Tag,
@@ -164,12 +166,16 @@ lookupOrAdd x c@(C var) =
 --    unlikely to be a problem if all instances are ground.)
 -- 2. Equality and hashing must consider all data in a value. It need not
 --    necessarily be structural equality, but a subterm should not simply be
---    ignored. (An example of why someone might want to do this is annotations
---    in an abstract syntax tree.)
+--    ignored. (An example of why someone might want to ave equality ignore
+--    parts of a type is annotations in an abstract syntax tree.)
 class (Eq a, Hashable a) => HashCons a where
   hcCache :: Cache a
   hcCache = unsafePerformIO newCache
   {-# NOINLINE hcCache #-}
+
+instance HashCons Integer
+instance HashCons [Char]
+-- others?
 
 -- | Make a hash-consed value.
 hc :: HashCons a => a -> HC a

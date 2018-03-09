@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-missing-signatures -Wno-orphans #-}
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
 
 {-# LANGUAGE
     DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving,
@@ -20,8 +20,6 @@ import Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-
-instance HashCons String
 
 genString :: Gen String
 genString = Gen.string (Range.linear 0 30) Gen.unicode
