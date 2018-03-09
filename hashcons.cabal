@@ -21,7 +21,8 @@ library
   exposed-modules:
     Data.HashCons,
     Data.HashCons.ConstRef,
-    Data.HashCons.MkWeak
+    Data.HashCons.MkWeak,
+    Data.HashCons.Memo
   build-depends:
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
@@ -31,6 +32,7 @@ library
 test-suite test-hashcons
   type: exitcode-stdio-1.0
   main-is: tests.hs
+  other-modules: TestHashCons, TestMemo
   hs-source-dirs: test
   default-language: Haskell2010
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
@@ -52,7 +54,7 @@ executable hashcons-example-expr
   default-language: Haskell2010
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-    base ^>= 4.10.1.0,
-    hashcons
+    hashcons,
+    base ^>= 4.10.1.0
   if !flag(build-examples)
     buildable: False
