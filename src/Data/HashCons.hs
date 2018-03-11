@@ -2,7 +2,7 @@
 -- Module:      Data.HashCons
 -- Description: Hash-consing support
 -- Copyright:   © 2018 Andy Morris
--- Licence:     LGPL-3
+-- Licence:     BSD3
 -- Maintainer:  hello@andy-morris.xyz
 -- Stability:   experimental
 -- Portability: GHC internals; weak pointers & finalizers; stable names

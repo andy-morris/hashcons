@@ -5,7 +5,7 @@ synopsis: Hash-consing and memoisation
 description:
   Hash-consing (a.k.a. interning) and memoisation, with a mostly-clean
   interface. This library does all the dirty tricks so you don't have to.
-license: LGPL-3
+license: BSD3
 license-file: LICENCE.txt
 
 author: Andy Morris <hello@andy-morris.xyz>

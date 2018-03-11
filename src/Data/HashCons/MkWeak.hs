@@ -2,7 +2,7 @@
 -- Module:      Data.HashCons.MkWeak
 -- Description: The @MkWeak@ class
 -- Copyright:   © 2018 Andy Morris
--- Licence:     AGPL-3
+-- Licence:     BSD3
 -- Maintainer:  hello@andy-morris.xyz
 -- Stability:   experimental
 -- Portability: GHC internals
