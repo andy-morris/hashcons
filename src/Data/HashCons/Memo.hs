@@ -13,7 +13,9 @@
 
 {-# LANGUAGE
     AllowAmbiguousTypes, DataKinds, DefaultSignatures, FlexibleContexts,
-    LambdaCase, ScopedTypeVariables, TypeApplications, TypeFamilies
+    GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables,
+    StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators,
+    UndecidableInstances
   #-}
 
 module Data.HashCons.Memo
@@ -32,10 +34,32 @@ import Data.HashCons.MkWeak
 import Data.Hashable (Hashable)
 import qualified Data.HashTable.IO as HashTable
 
-import Data.Kind  (Type)
+import Data.Kind (Type)
+import Data.Type.Bool
 
 import Control.Concurrent.MVar
 import System.IO.Unsafe
+
+-- for MemoArg instances only
+import Control.Concurrent
+import Data.Fixed
+import Data.Functor.Compose
+import Data.Functor.Const
+import Data.Functor.Identity
+import Data.Functor.Product
+import Data.Functor.Sum
+import Data.Int
+import qualified Data.Monoid as M
+import Data.List.NonEmpty
+import Data.Proxy
+import Data.Ratio
+import qualified Data.Semigroup as S
+import Data.Unique
+import Data.Version
+import Data.Word
+import Numeric.Natural
+import System.Mem.StableName
+import Type.Reflection
 
 
 type HashTable k v = HashTable.BasicHashTable k v
@@ -68,36 +92,6 @@ class (Eq (Key k), Hashable (Key k)) => MemoArg k where
   -- doing nothing, for when @'CanFinalize' k ~ ''False'@.
   tryAddFinalizer :: k -> Finalizer -> IO ()
   tryAddFinalizer _ _ = pure ()
-
-
-instance MemoArg Bool
-instance MemoArg Ordering
-instance MemoArg Char
-instance MemoArg Int
-instance MemoArg Integer
-instance MemoArg Float
-instance MemoArg Double
-instance MemoArg Word
-instance MemoArg ()
-
-instance MemoArg a => MemoArg [a] where
-  type Key [a] = [Key a]
-  key = fmap key
-
-instance MemoArg a => MemoArg (Maybe a) where
-  type Key (Maybe a) = Maybe (Key a)
-  key = fmap key
-
-instance (MemoArg a, MemoArg b) => MemoArg (Either a b) where
-  type Key (Either a b) = Either (Key a) (Key b)
-  key = either (Left . key) (Right . key)
-
-
-instance MemoArg (HC a) where
-  type Key (HC a) = Tag a
-  key = getTag
-  type CanFinalize (HC a) = 'True
-  tryAddFinalizer = addFinalizer
 
 
 type MemoCache k v = MVar (HashTable (Key k) v)
@@ -191,3 +185,173 @@ memo4 f =
     uncheckedMemo $ \y ->
       uncheckedMemo $ \z ->
         uncheckedMemo $ f x y z
+
+
+-- MemoArg instances
+
+instance MemoArg (HC a) where
+  type Key (HC a) = Tag a
+
+  key = getTag
+
+  type CanFinalize (HC a) = 'True
+
+  tryAddFinalizer = addFinalizer
+
+
+instance MemoArg Bool
+instance MemoArg Ordering
+instance MemoArg Char
+instance MemoArg Int
+instance MemoArg Integer
+instance MemoArg Float
+instance MemoArg Double
+instance MemoArg Word
+instance MemoArg ()
+
+-- | doesn't add finalizer to elements
+instance MemoArg a => MemoArg [a] where
+  type Key [a] = [Key a]
+
+  key = fmap key
+
+-- | tries to add finalizer to contents, if any
+instance MemoArg a => MemoArg (Maybe a) where
+  type Key (Maybe a) = Maybe (Key a)
+
+  key = fmap key
+
+  type CanFinalize (Maybe a) = 'False
+
+  tryAddFinalizer m fin = case m of
+    Just x  -> tryAddFinalizer x fin
+    Nothing -> pure ()
+
+-- | tries to add finalizer to contents
+instance (MemoArg a, MemoArg b) => MemoArg (Either a b) where
+  type Key (Either a b) = Either (Key a) (Key b)
+
+  key = either (Left . key) (Right . key)
+
+  type CanFinalize (Either a b) =
+    CanFinalize a && CanFinalize b
+
+  tryAddFinalizer e fin = case e of
+    Left  x -> tryAddFinalizer x fin
+    Right y -> tryAddFinalizer y fin
+
+-- | tries to add finalizer to both elements
+instance (MemoArg a, MemoArg b) => MemoArg (a, b) where
+  type Key (a, b) = (Key a, Key b)
+
+  key (x, y) = (key x, key y)
+
+  type CanFinalize (a, b) =
+    CanFinalize a || CanFinalize b
+
+  tryAddFinalizer (a, b) fin = do
+    tryAddFinalizer a fin
+    tryAddFinalizer b fin
+
+-- | tries to add finalizer to all elements
+instance (MemoArg a, MemoArg b, MemoArg c) => MemoArg (a, b, c) where
+  type Key (a, b, c) = (Key a, Key b, Key c)
+
+  key (x, y, z) = (key x, key y, key z)
+
+  type CanFinalize (a, b, c) =
+    CanFinalize a || CanFinalize b || CanFinalize c
+
+  tryAddFinalizer (a, b, c) fin = do
+    tryAddFinalizer a fin
+    tryAddFinalizer b fin
+    tryAddFinalizer c fin
+
+instance MemoArg ThreadId
+
+instance MemoArg a => MemoArg (Fixed a)
+
+-- | tries to add finalizer to contents
+deriving instance MemoArg a => MemoArg (Const a b)
+
+-- | tries to add finalizer to contents
+deriving instance MemoArg (f (g a)) => MemoArg (Compose f g a)
+
+-- | tries to add finalizer to contents
+deriving instance MemoArg a => MemoArg (Identity a)
+
+-- | tries to add finalizer to both elements
+instance (MemoArg (f a), MemoArg (g a)) => MemoArg (Product f g a) where
+  type Key (Product f g a) = (Key (f a), Key (g a))
+
+  key (Pair x y) = (key x, key y)
+
+  type CanFinalize (Product f g a) =
+    CanFinalize (f a) || CanFinalize (g a)
+
+  tryAddFinalizer (Pair x y) fin = do
+    tryAddFinalizer x fin
+    tryAddFinalizer y fin
+
+-- | tries to add finalizer to contents
+instance (MemoArg (f a), MemoArg (g a)) => MemoArg (Sum f g a) where
+  type Key (Sum f g a) = Either (Key (f a)) (Key (g a))
+
+  key s = case s of
+    InL x -> Left  $ key x
+    InR x -> Right $ key x
+
+  type CanFinalize (Sum f g a) =
+    CanFinalize (f a) && CanFinalize (g a)
+
+  tryAddFinalizer s fin = case s of
+    InL x -> tryAddFinalizer x fin
+    InR y -> tryAddFinalizer y fin
+
+instance MemoArg Int8
+instance MemoArg Int16
+instance MemoArg Int32
+instance MemoArg Int64
+
+-- | doesn't add finalizer to elements
+instance MemoArg a => MemoArg (NonEmpty a) where
+  type Key (NonEmpty a) = NonEmpty (Key a)
+
+  key = fmap key
+
+instance MemoArg (Proxy a)
+
+instance MemoArg a => MemoArg (Ratio a) where
+  type Key (Ratio a) = (Key a, Key a)
+
+  key x = (key $ numerator x, key $ denominator x)
+
+deriving instance                  MemoArg M.All
+deriving instance                  MemoArg M.Any
+deriving instance MemoArg a     => MemoArg (M.Dual    a)
+deriving instance MemoArg a     => MemoArg (M.First   a)
+deriving instance MemoArg a     => MemoArg (M.Last    a)
+deriving instance MemoArg a     => MemoArg (M.Product a)
+deriving instance MemoArg a     => MemoArg (M.Sum     a)
+deriving instance MemoArg (f a) => MemoArg (M.Alt f   a)
+
+deriving instance MemoArg a => MemoArg (S.Min    a)
+deriving instance MemoArg a => MemoArg (S.Max    a)
+deriving instance MemoArg a => MemoArg (S.First  a)
+deriving instance MemoArg a => MemoArg (S.Last   a)
+deriving instance MemoArg a => MemoArg (S.Option a)
+
+instance MemoArg Unique
+
+instance MemoArg Version
+
+instance MemoArg Word8
+instance MemoArg Word16
+instance MemoArg Word32
+instance MemoArg Word64
+
+instance MemoArg Natural
+
+instance MemoArg (StableName a)
+
+instance MemoArg (TypeRep a)
