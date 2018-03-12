@@ -36,7 +36,9 @@ library
     base       ^>= 4.10.1.0,
     hashable   ^>= 1.2.6.1,
     hashtables ^>= 1.2.2.1,
-    deepseq    ^>= 1.4.3.0
+    deepseq    ^>= 1.4.3.0,
+    bytestring ^>= 0.10.8.2,
+    text       ^>= 1.2.3.0
 
 test-suite test-hashcons
   type: exitcode-stdio-1.0

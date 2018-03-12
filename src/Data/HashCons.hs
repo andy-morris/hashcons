@@ -40,6 +40,14 @@ import System.Mem.StableName
 import System.IO.Unsafe
 import Foreign
 
+-- for HashCons instances {{{
+import Numeric.Natural
+import qualified Data.Text as S
+import qualified Data.Text.Lazy as L
+import qualified Data.ByteString as S
+import qualified Data.ByteString.Lazy as L
+-- }}}
+
 
 -- | A tag for a value. Tags are unique among values which are simultaneously
 -- alive.
@@ -173,10 +181,19 @@ class (Eq a, Hashable a) => HashCons a where
   hcCache = unsafePerformIO newCache
   {-# NOINLINE hcCache #-}
 
-instance HashCons Integer
-instance HashCons [Char]
--- others?
-
 -- | Make a hash-consed value.
 hc :: HashCons a => a -> HC a
 hc x = unsafePerformIO $ lookupOrAdd x hcCache
+
+
+instance HashCons Integer
+instance HashCons Natural
+instance HashCons [Char]
+-- others?
+
+
+instance HashCons S.Text
+instance HashCons L.Text
+
+instance HashCons S.ByteString
+instance HashCons L.ByteString

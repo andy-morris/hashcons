@@ -40,7 +40,7 @@ import Data.Type.Bool
 import Control.Concurrent.MVar
 import System.IO.Unsafe
 
--- for MemoArg instances only
+-- for MemoArg instances only {{{
 import Control.Concurrent
 import Data.Fixed
 import Data.Functor.Compose
@@ -60,6 +60,12 @@ import Data.Word
 import Numeric.Natural
 import System.Mem.StableName
 import Type.Reflection
+
+import qualified Data.Text as S
+import qualified Data.Text.Lazy as L
+import qualified Data.ByteString as S
+import qualified Data.ByteString.Lazy as L
+-- }}}
 
 
 type HashTable k v = HashTable.BasicHashTable k v
@@ -355,3 +361,9 @@ instance MemoArg Natural
 instance MemoArg (StableName a)
 
 instance MemoArg (TypeRep a)
+
+instance MemoArg S.Text
+instance MemoArg L.Text
+
+instance MemoArg S.ByteString
+instance MemoArg L.ByteString
