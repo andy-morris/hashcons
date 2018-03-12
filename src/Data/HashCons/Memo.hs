@@ -12,10 +12,10 @@
 {-# OPTIONS_GHC -fno-float-in -fno-full-laziness #-}
 
 {-# LANGUAGE
-    AllowAmbiguousTypes, DataKinds, DefaultSignatures, FlexibleContexts,
-    GeneralizedNewtypeDeriving, LambdaCase, ScopedTypeVariables,
-    StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators,
-    UndecidableInstances
+    AllowAmbiguousTypes, BangPatterns, DataKinds, DefaultSignatures,
+    FlexibleContexts, GeneralizedNewtypeDeriving, LambdaCase,
+    ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeFamilies,
+    TypeOperators, UndecidableInstances
   #-}
 
 module Data.HashCons.Memo

@@ -17,7 +17,7 @@
 --
 -- This library should be thread- and exception-safe.
 
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE BangPatterns, FlexibleInstances #-}
 
 module Data.HashCons
   (HashCons, hc,
