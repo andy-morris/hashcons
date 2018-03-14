@@ -2,7 +2,7 @@
 -- Module:      Data.HashCons.Memo
 -- Description: Memoisation via hash-consing
 -- Copyright:   © 2018 Andy Morris
--- Licence:     BSD3
+-- Licence:     BSD-3-Clause
 -- Maintainer:  hello@andy-morris.xyz
 -- Stability:   experimental
 -- Portability: TODO
