@@ -57,6 +57,26 @@ test-suite test-hashcons
     hedgehog ^>= 0.5.2,
     async    ^>= 2.1.1.1
 
+benchmark bench-hashcons-space
+  import: deps, exe
+  type: exitcode-stdio-1.0
+  main-is: bench-space.hs
+  other-modules: Expr
+  hs-source-dirs: bench
+  build-depends:
+    unordered-containers ^>= 0.2.9.0,
+    weigh                ^>= 0.0.7
+
+benchmark bench-hashcons-time
+  import: deps, exe
+  type: exitcode-stdio-1.0
+  main-is: bench-time.hs
+  other-modules: Expr
+  hs-source-dirs: bench
+  build-depends:
+    unordered-containers ^>= 0.2.9.0,
+    gauge                ^>= 0.2.1
+
 flag build-examples
   description: Whether to build the example programs
   default: False
