@@ -42,6 +42,8 @@ type to be an instance of `HashCons`, which in turn requires `Eq` and `Hashable`
 ```haskell
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric, PatternSynonyms, ViewPatterns #-}
 
+import Data.HashCons (HashCons, HC, hc, getVal)
+
 type Id = HC Text
 
 type Expr = HC Expr'
@@ -82,6 +84,8 @@ You can also use this library to _memoise_ functions. This keeps the results of
 previous function calls, so they can be reused. Memoising a function is simple:
 
 ```haskell
+import Data.HashCons.Memo (memo3)
+
 subst :: Expr -> Id -> Expr -> Expr
 subst = memo3 $ \a x e -> case a of
   Var y   -> if x == y then e else a
