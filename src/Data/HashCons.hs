@@ -49,8 +49,27 @@ import qualified Data.ByteString.Lazy as L
 -- }}}
 
 
+-- * Why tags?
+--
+-- After reading the implementation below, you might come away wondering
+-- something like, "why does HC have a Tag? Why can't it just check equality of
+-- the ConstRef inside?"
+--
+-- That would work for the HCs themselves; the purpose of the tag is for
+-- memoisation. The memo tables are pruned when a value is garbage collected,
+-- but if the values are /in/ the table, then this can never happen. A Tag
+-- doesn't actually contain any references to the value itself, so it can be
+-- used as the memo table key and allow pruning.
+--
+-- Less importantly, Tags also have constant-time hashing, however this could
+-- also be achieved by storing the original value's hash.
+--
+-- Tags are also exported to the outside world since other applications may find
+-- their non-ownership behaviour useful.
+
+
 -- | A tag for a value. Tags are unique among values which are simultaneously
--- alive.
+-- alive. They also /don't/ keep the corresponding value alive on their own.
 newtype Tag a = Tag {fromTag :: StableName a} deriving Eq
 
 instance Hashable (Tag a) where

@@ -17,6 +17,9 @@ tested-with: GHC == 8.2.2
 homepage: https://github.com/andy-morris/hashcons
 bug-reports: https://github.com/andy-morris/hashcons/issues
 
+extra-source-files:
+  README.md
+
 source-repository head
   type: git
   location: git://github.com/andy-morris/hashcons.git
