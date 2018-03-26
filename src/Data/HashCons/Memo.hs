@@ -25,7 +25,8 @@ module Data.HashCons.Memo
    uncheckedMemo, memo,
    -- * Nested memoisation
    -- $nesting
-   memo2, memo3, memo4)
+   memo2,          memo3,          memo4,
+   uncheckedMemo2, uncheckedMemo3, uncheckedMemo4)
 where
 
 import Data.HashCons
@@ -171,26 +172,40 @@ uncheckedMemo (f :: a -> b) =
 memo :: (MemoArg a, CanFinalize a ~ 'True) => (a -> b) -> a -> b
 memo = uncheckedMemo
 
+-- | Memoise a binary function, without checking that the outer table can
+-- be pruned.
+uncheckedMemo2 :: (MemoArg a, MemoArg b) => (a -> b -> c) -> a -> b -> c
+uncheckedMemo2 f = uncheckedMemo $ uncheckedMemo . f
+
 -- | Memoise a binary function, checking that the outer table can be pruned.
 memo2 :: (MemoArg a, MemoArg b, CanFinalize a ~ 'True)
       => (a -> b -> c) -> a -> b -> c
-memo2 f = memo $ \x -> uncheckedMemo $ f x
+memo2 = uncheckedMemo2
+
+-- | Memoise a ternary function, without checking that the outermost table
+-- can be pruned.
+uncheckedMemo3 :: (MemoArg a, MemoArg b, MemoArg c)
+               => (a -> b -> c -> d) -> a -> b -> c -> d
+uncheckedMemo3 f = uncheckedMemo $ uncheckedMemo2 . f
 
 -- | Memoise a ternary function, checking that the outermost table can be
 -- pruned.
 memo3 :: (MemoArg a, MemoArg b, MemoArg c, CanFinalize a ~ 'True)
       => (a -> b -> c -> d) -> a -> b -> c -> d
-memo3 f = memo $ \x -> uncheckedMemo $ \y -> uncheckedMemo $ f x y
+memo3 = uncheckedMemo3
 
--- | Memoise a quaternary function, checking that the outermost table can be
--- pruned.
-memo4 :: (MemoArg a, MemoArg b, MemoArg c, MemoArg d, CanFinalize a ~ 'True)
+-- | Memoise a quaternary function, without checking that the outermost
+-- table can be pruned.
+uncheckedMemo4 :: (MemoArg a, MemoArg b, MemoArg c, MemoArg d)
+               => (a -> b -> c -> d -> e) -> a -> b -> c -> d -> e
+uncheckedMemo4 f = uncheckedMemo $ uncheckedMemo3 . f
+
+-- | Memoise a quaternary function, checking that the outermost table can
+-- be pruned.
+memo4 :: (MemoArg a, MemoArg b, MemoArg c, MemoArg d,
+          CanFinalize a ~ 'True)
       => (a -> b -> c -> d -> e) -> a -> b -> c -> d -> e
-memo4 f =
-  memo $ \x ->
-    uncheckedMemo $ \y ->
-      uncheckedMemo $ \z ->
-        uncheckedMemo $ f x y z
+memo4 = uncheckedMemo4
 
 
 -- MemoArg instances
