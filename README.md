@@ -1,12 +1,13 @@
-# `hashcons`: Hash consing and memoisation for Haskell
+# `hashcons`: Hash-consing and memoisation for Haskell
 
-Hash-consing (a.k.a. interning) and memoisation, with a mostly-clean interface.
-This library does all the dirty tricks so you don't have to.
+This library provides hash-consing (a.k.a. interning) and memoisation, with a
+mostly-clean interface. This library does all the dirty tricks so you don't have
+to.
 
 
-## Quickstart
+## Quick start
 
-1. Make instances of `HashCons` (and it superclasses `Eq` and `Hashable`) for
+1. Make instances of `HashCons` (and its superclasses `Eq` and `Hashable`) for
    your types. Be aware that `HashCons` instances can't have type variables or
    contexts.
 2. Wrap types which might have large values (`Text`, ASTs, etc.) in `HC`.
@@ -106,8 +107,8 @@ this check, and don't mind if the memo table continues to grow forever, you can
 use the `uncheckedMemo` family of functions, which doesn't care about the value
 of `CanFinalize`.
 
-The `memoN` functions only check the first argument for finalizers–as long as
-the it can run finalisers, the table will be pruned.
+The `memoN` functions only check the first argument—as long as it can run
+finalisers, the table will be pruned.
 
 
 ## Requested contributions
