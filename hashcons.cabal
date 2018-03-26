@@ -18,7 +18,8 @@ homepage: https://github.com/andy-morris/hashcons
 bug-reports: https://github.com/andy-morris/hashcons/issues
 
 extra-source-files:
-  README.md
+  README.md,
+  CHANGELOG.md
 
 source-repository head
   type: git
