@@ -150,24 +150,6 @@ remove x (C var) =
   withMVar var $ \cache ->
     HashTable.delete cache hx
 
--- TODO: switch to this when/if mutateIO is added to hashtables
--- newHC :: (Eq a, Hashable a) => a -> Cache a -> IO (Maybe (CacheEntry a), HC a)
--- newHC x c = do
---   y   <- makeHC x
---   ptr <- mkWeakPtr y (Just $ remove x c)
---   pure (Just ptr, y)
---
--- lookupOrAdd :: (Eq a, Hashable a) => a -> Cache a -> IO (HC a)
--- lookupOrAdd x c@(C var) =
---   let !hx = hashed x in
---   withMVar var $ \cache ->
---     mutateIO cache hx $ \ent -> case ent of
---       Nothing  -> newHC x c
---       Just ptr -> deRefWeak ptr >>= \y' -> case y' of
---         Nothing -> newHC x c
---         Just y  -> pure (Just ptr, y)
-
-
 lookupOrAdd :: (Eq a, Hashable a) => a -> Cache a -> IO (HC a)
 lookupOrAdd x c@(C var) =
     withMVar var $ \cache ->
