@@ -12,7 +12,9 @@ license-file: LICENCE.txt
 author: Andy Morris <hello@andy-morris.xyz>
 maintainer: Andy Morris <hello@andy-morris.xyz>
 
-tested-with: GHC == 8.2.2
+tested-with:
+  GHC == 8.2.2,
+  GHC == 8.4.1
 
 homepage: https://github.com/andy-morris/hashcons
 bug-reports: https://github.com/andy-morris/hashcons/issues
@@ -27,7 +29,7 @@ source-repository head
 
 common deps
   build-depends:
-    base       ^>= 4.10.1.0,
+    base        >= 4.9.1.0 && < 4.12,
     hashable   ^>= 1.2.6.1,
     hashtables ^>= 1.2.2.1,
     deepseq    ^>= 1.4.3.0,
@@ -59,7 +61,7 @@ test-suite test-hashcons
   hs-source-dirs: test
   build-depends:
     hedgehog ^>= 0.5.2,
-    async    ^>= 2.1.1.1
+    async     >= 2.1.1.1 && < 2.3
 
 benchmark bench-hashcons-space
   import: deps, exe
