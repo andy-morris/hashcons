@@ -17,7 +17,7 @@
 --
 -- This library should be thread- and exception-safe.
 
-{-# LANGUAGE BangPatterns, FlexibleInstances #-}
+{-# LANGUAGE BangPatterns, FlexibleInstances, TypeFamilies #-}
 
 module Data.HashCons
   (HashCons, hc,
@@ -39,6 +39,8 @@ import System.Mem.StableName
 
 import System.IO.Unsafe
 import Foreign
+
+import GHC.Exts (IsString (..), IsList (..))
 
 -- for HashCons instances {{{
 import Numeric.Natural
@@ -198,3 +200,13 @@ instance HashCons L.Text
 
 instance HashCons S.ByteString
 instance HashCons L.ByteString
+
+
+instance (IsString a, HashCons a) => IsString (HC a) where
+  fromString = hc . fromString
+
+instance (IsList a, HashCons a) => IsList (HC a) where
+  type Item (HC a) = Item a
+  fromList    = hc . fromList
+  fromListN n = hc . fromListN n
+  toList      = toList . getVal
