@@ -29,7 +29,7 @@ source-repository head
 
 common deps
   build-depends:
-    base        >= 4.9.1.0 && < 4.12,
+    base        >= 4.10.1.0 && < 4.12,
     hashable   ^>= 1.2.6.1,
     hashtables ^>= 1.2.2.1,
     deepseq    ^>= 1.4.3.0,
