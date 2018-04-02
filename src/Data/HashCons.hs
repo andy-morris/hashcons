@@ -43,6 +43,7 @@ import System.Mem.StableName
 import System.IO.Unsafe
 import Foreign
 
+import Data.Data
 import GHC.Exts (IsString (..), IsList (..))
 
 -- for HashCons instances {{{
@@ -142,6 +143,20 @@ instance (Storable a, HashCons a) => Storable (HC a) where
   alignment = alignment . getVal
   peek      = fmap hc . peek . castPtr
   poke p    = poke (castPtr p) . getVal
+
+-- | Forwards to the underlying value and ignores the tag
+instance (Data a, HashCons a) => Data (HC a) where
+  gfoldl  k z (HC x) = z HC `k` x
+  gunfold k z _      = k (z HC)
+
+  toConstr   _ = constrHC
+  dataTypeOf _ = dataTypeHC
+
+constrHC :: Constr
+constrHC = mkConstr dataTypeHC "HC" [] Prefix
+
+dataTypeHC :: DataType
+dataTypeHC = mkDataType "HC" [constrHC]
 
 
 type HashTable k v = BasicHashTable k v

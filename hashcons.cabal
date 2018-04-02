@@ -61,7 +61,8 @@ test-suite test-hashcons
   hs-source-dirs: test
   build-depends:
     hedgehog ^>= 0.5.2,
-    async     >= 2.1.1.1 && < 2.3
+    async     >= 2.1.1.1 && < 2.3,
+    syb      ^>= 0.7
 
 benchmark bench-hashcons-space
   import: deps, exe

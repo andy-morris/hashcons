@@ -8,6 +8,7 @@ module TestHashCons (runTests) where
 
 import Data.HashCons
 import GHC.Generics
+import Generics.SYB (Data, everything, mkQ)
 
 import Control.Concurrent.Async
 import Control.DeepSeq
@@ -28,7 +29,7 @@ copyString = foldr (:) []
 data HcString' =
     SNil'
   | SCons' Char HcString
-  deriving (Eq, Show, Generic)
+  deriving (Eq, Show, Generic, Data)
 
 type HcString = HC HcString'
 
@@ -89,6 +90,10 @@ prop_conc = property $ do
   let hcAll = evaluate . force . map fromString
   (xs', ys') <- evalIO $ concurrently (hcAll xs) (hcAll ys)
   assert $ xs'!!xi == ys'!!yi && toString (xs'!!xi) == str
+
+prop_toString_everything = property $ do
+  str <- forAll genHcString
+  toString str === everything (++) (mkQ "" pure) str
 
 
 runTests :: IO Bool
