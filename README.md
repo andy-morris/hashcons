@@ -56,8 +56,7 @@ data Expr' =
 
 {-# COMPLETE Var, App, Lam #-}
 pattern Var :: Id -> Expr
-pattern Var x <- Var' (getVal -> x) -- getVal :: HC a -> a
-  where Var x =  Var' $ hc x        -- hc     :: HashCons a => a -> HC a
+pattern Var x = Var' (HC x)
 -- and similarly for App & Lam
 ```
 

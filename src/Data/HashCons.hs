@@ -17,11 +17,14 @@
 --
 -- This library should be thread- and exception-safe.
 
-{-# LANGUAGE BangPatterns, FlexibleInstances, TypeFamilies #-}
+{-# LANGUAGE
+    BangPatterns, FlexibleInstances, PatternSynonyms, TypeFamilies,
+    ViewPatterns
+  #-}
 
 module Data.HashCons
   (HashCons, hc,
-   HC, getVal, getTag, Tag,
+   HC (HC), getVal, getTag, Tag,
    Hashable (..))
 where
 
@@ -83,19 +86,25 @@ makeTag x = fmap Tag . makeStableName $! x
 
 
 -- | A value which has been given a unique tag.
-data HC a = HC {-# UNPACK #-} !(Tag a) !(ConstRef a)
+data HC a = MkHC {-# UNPACK #-} !(Tag a) !(ConstRef a)
 
 -- | Make an @HC@ value.
 makeHC :: a -> IO (HC a)
-makeHC x = HC <$> makeTag x <*> newConstRef x
+makeHC x = MkHC <$> makeTag x <*> newConstRef x
 
 -- | Retrieves the unique tag for the value.
 getTag :: HC a -> Tag a
-getTag (HC t _) = t
+getTag (MkHC t _) = t
 
 -- | Retrieves the underlying value.
 getVal :: HC a -> a
-getVal (HC _ x) = readConstRef x
+getVal (MkHC _ x) = readConstRef x
+
+pattern HC :: HashCons a => a -> HC a
+pattern HC x <- (getVal -> x)
+  where HC x =  hc x
+
+{-# COMPLETE HC #-}
 
 
 -- | \(\mathcal{O}(1)\) using the tag
@@ -121,7 +130,7 @@ instance NFData a => NFData (HC a) where
   rnf = rnf . getVal
 
 instance MkWeak (HC a) where
-  mkWeak (HC _ x) = mkWeak x
+  mkWeak (MkHC _ x) = mkWeak x
 
 -- | Reads an underlying value and caches it
 instance (Read a, HashCons a) => Read (HC a) where

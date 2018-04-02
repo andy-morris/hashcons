@@ -73,9 +73,9 @@ newtype Expr = E {unE :: HC (ExprLayer Expr)}
   deriving newtype (Eq, Ord, Show, Hashable, NFData, MemoArg)
 
 instance IsExpr Expr where
-  make = E . hc
+  make = E . HC
   {-# INLINE make #-}
-  dest = getVal . unE
+  dest (E (HC e)) = e
   {-# INLINE dest #-}
 
 

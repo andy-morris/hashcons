@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
-{-# LANGUAGE DeriveGeneric, TemplateHaskell #-}
+{-# LANGUAGE
+    DeriveDataTypeable, DeriveGeneric, PatternSynonyms, TemplateHaskell
+  #-}
 
 module TestHashCons (runTests) where
 
@@ -24,26 +26,31 @@ copyString = foldr (:) []
 
 
 data HcString' =
-    SNil
-  | Char :> HcString
+    SNil'
+  | SCons' Char HcString
   deriving (Eq, Show, Generic)
 
 type HcString = HC HcString'
 
-instance NFData HcString' where
-  rnf SNil      = ()
-  rnf (c :> cs) = c `seq` rnf (getVal cs)
+pattern SNil :: HcString
+pattern SNil = HC SNil'
+
+pattern (:>) :: Char -> HcString -> HcString
+pattern c :> cs = HC (SCons' c cs)
+
+{-# COMPLETE SNil, (:>) #-}
+
+instance NFData HcString'
 
 instance Hashable HcString'
 instance HashCons HcString'
 
 fromString :: String -> HcString
-fromString = foldr (\x xs -> hc $ x :> xs) (hc SNil)
+fromString = foldr (:>) SNil
 
 toString :: HcString -> String
-toString = go . getVal where
-  go SNil      = ""
-  go (c :> cs) = c : toString cs
+toString SNil      = ""
+toString (c :> cs) = c : toString cs
 
 genHcString :: Gen HcString
 genHcString = fromString <$> genString
