@@ -156,7 +156,7 @@ constrHC :: Constr
 constrHC = mkConstr dataTypeHC "HC" [] Prefix
 
 dataTypeHC :: DataType
-dataTypeHC = mkDataType "HC" [constrHC]
+dataTypeHC = mkDataType "Data.HashCons.HC" [constrHC]
 
 
 type HashTable k v = BasicHashTable k v
