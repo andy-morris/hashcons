@@ -57,6 +57,7 @@ import Data.Ratio
 import qualified Data.Semigroup as S
 import Data.Unique
 import Data.Version
+import Data.Void
 import Data.Word
 import Numeric.Natural
 import System.Mem.StableName
@@ -365,6 +366,12 @@ deriving instance MemoArg a => MemoArg (S.Option a)
 instance MemoArg Unique
 
 instance MemoArg Version
+
+-- | Can vacuously run finalizers since memoised functions are strict
+-- anyway
+instance MemoArg Void where
+    type CanFinalize Void = 'True
+    tryAddFinalizer = absurd
 
 instance MemoArg Word8
 instance MemoArg Word16
